@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>東京喰種999 実機風 抽選体験機</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#050505;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif}
+#app{max-width:560px;margin:auto;padding:10px}.machine{background:linear-gradient(#292929,#080808);border:2px solid #555;border-radius:18px;padding:10px;box-shadow:0 0 35px #000}
+.logo{text-align:center;font-size:22px;font-weight:1000;letter-spacing:2px}.spec{text-align:center;color:#aaa;font-size:10px}
+.screen{height:360px;margin-top:8px;border:4px solid #333;border-radius:12px;position:relative;overflow:hidden;background:radial-gradient(circle,#4a1717,#070707 68%);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.screen.flash{animation:flash .12s 8}@keyframes flash{50%{filter:brightness(3)}}
+.bg{position:absolute;inset:-30%;opacity:0;background:conic-gradient(transparent,#e00000,transparent,#fff,transparent);filter:blur(25px)}.bg.on{opacity:.22;animation:rot .7s linear infinite}@keyframes rot{to{transform:rotate(360deg)}}
+.label{position:absolute;top:7px;left:8px;font-size:11px;color:#bbb}.count{position:absolute;top:7px;right:8px;font-size:11px;color:#bbb}
+.title{z-index:2;text-align:center;font-size:38px;font-weight:1000;line-height:1.15;text-shadow:0 0 14px #000}.sub{z-index:2;margin-top:8px;font-weight:800;text-align:center}.hint{z-index:2;color:#aaa;font-size:13px;margin-top:13px}
+.holds{z-index:3;display:flex;gap:8px;margin-top:18px}.h{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#292929;border:2px solid #666;font-size:12px;font-weight:900}.h.red{background:#8b1111;border-color:#ff3333;box-shadow:0 0 12px #f00}.h.gold{background:#8a6800;border-color:#ffe56a;box-shadow:0 0 15px #ffd400}
+button{border:0;border-radius:9px;padding:14px;font-size:16px;font-weight:900;background:#ddd;color:#111}button:active{transform:scale(.98)}.main{grid-column:1/-1;background:#9d1010;color:#fff;font-size:21px}.disabled{opacity:.3;pointer-events:none}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}.stat{background:#111;border:1px solid #333;padding:7px;text-align:center;font-size:10px}.stat b{display:block;font-size:17px}
+#log{height:110px;overflow:auto;margin-top:8px;background:#090909;border:1px solid #292929;padding:7px;font-size:11px}
+#custom{display:none;background:#111;border:1px solid #444;border-radius:8px;padding:9px;margin-top:8px;font-size:12px}.note{font-size:10px;color:#888;line-height:1.4;margin-top:7px}
+.shake{animation:shake .06s infinite}@keyframes shake{25%{transform:translate(3px,-2px)}50%{transform:translate(-3px,2px)}75%{transform:translate(2px,2px)}}
+</style>
+</head>
+<body>
+<div id="app"><div class="machine">
+<div class="logo">e 東京喰種 超デカ超一撃</div><div class="spec">999 抽選体験機｜iPhone対応</div>
+<div class="screen" id="screen">
+<div class="bg" id="bg"></div><div class="label" id="mode">通常時</div><div class="count" id="count">0回転</div>
+<div class="title" id="title">READY</div><div class="sub" id="sub">スタートを押して下さい</div><div class="hint" id="hint">保留 → 先読み → リーチ → 当落</div>
+<div class="holds"><div class="h" id="h0">保</div><div class="h" id="h1">保</div><div class="h" id="h2">保</div><div class="h" id="h3">保</div></div>
+</div>
+<div class="buttons">
+<button class="main" id="start" onclick="normalSpin()">🔴 スタート</button>
+<button onclick="quick(100)">100回転</button><button onclick="quick(1000)">1000回転</button>
+<button id="rushButton" class="disabled" onclick="rushSpin()">🔥 RUSH 1回転</button>
+<button onclick="toggleCustom()">⚙ 演出カスタム</button><button onclick="resetGame()">リセット</button>
+</div>
+<div id="custom">
+<label><input id="先バレ" type="checkbox" checked> 先バレ</label>　
+<label><input id="先読み" type="checkbox" checked> 先読み</label>　
+<label><input id="音" type="checkbox" checked> 効果音
+</div>
+<div class="stats"><div class="stat">通常回転<b id="spins">0</b></div><div class="stat">図柄揃い<b id="hits">0</b></div><div class="stat">獲得玉<b id="balls">0</b></div></div>
+<div id="log"></div>
+<div class="note">通常時の図柄揃い約1/999、喰種チャージ約1/538.8。図柄揃いは約50%で7500個＋HYPER喰種RUSH、非突入は約3000個。RUSHは5回転・約1/7.7を体験用に再現。実機の演出・抽選を完全再現するものではありません。</div>
+</div></div>
+<script>
+"use strict";
+let spins=0,hits=0,balls=0,busy=false,rushMode=false,rushLeft=0;
+
+const $=id=>document.getElementById(id);
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const chance=p=>Math.random()<p;
+
+function update(){
+ $("spins").textContent=spins.toLocaleString();
+ $("hits").textContent=hits.toLocaleString();
+ $("balls").textContent=balls.toLocaleString();
+ $("count").textContent=spins+"回転";
+ $("rushButton").classList.toggle("disabled",!rushMode||busy);
+ $("start").classList.toggle("disabled",busy||rushMode);
+ $("mode").textContent=rushMode?"HYPER喰種RUSH":"通常時";
+}
+function text(a,b,c){
+ $("title").textContent=a;$("sub").textContent=b;$("hint").textContent=c;
+}
+function addLog(t){$("log").innerHTML="<div>"+t+"</div>"+$("log").innerHTML}
+function sound(freq=440){
+ if(!$("音").checked)return;
+ try{
+  const A=new (window.AudioContext||window.webkitAudioContext)();
+  const o=A.createOscillator(),g=A.createGain();
+  o.frequency.value=freq;g.gain.value=.035;o.connect(g);g.connect(A.destination);
+  o.start();setTimeout(()=>{o.stop();A.close()},120);
+ }catch(e){}
+}
+function resetHolds(){
+ for(let i=0;i<4;i++){$("h"+i).className="h";$("h"+i).textContent="保";}
+}
+async function normalSpin(){
+ if(busy||rushMode)return;
+ busy=true;update();resetHolds();
+ $("bg").classList.add("on");$("title").classList.add("shake");
+ text("変動開始","保留入賞…","通常変動");
+ await wait(220);
+ let hot=chance(.12),hit=chance(1/999),charge=!hit&&chance(1/538.8);
+ if($("先バレ").checked&&chance(.10)){
+  sound(880);text("先バレ！","キーン！","期待度アップ");
+  await wait(260);
+ }
+ if($("先読み").checked){
+  $("h3").className="h "+(hot?"gold":"red");$("h3").textContent=hot?"金":"赤";
+  text(hot?"金保留":"赤保留","保留変化！","先読み演出");
+  await wait(300);
+ }
+ spins++;
+ if(hit){
+  sound(880);
+  text("東京喰種ZONE","突入！","覚醒SPリーチ");
+  await wait(350);
+  $("screen").classList.add("flash");
+  text("覚醒","決意のマスク","最終リーチ");
+  await wait(400);
+  text("押せ！！","運命を決めろ","ボタン");
+  await wait(350);
+  if(chance(.5)){
+   hits++;balls+=7500;rushMode=true;rushLeft=5;
+   text("7 7 7","7500個獲得！","HYPER喰種RUSH突入！");
+   addLog("🔥 大当り！ 7500個＋HYPER喰種RUSH");
+  }else{
+   hits++;balls+=3000;
+   text("7 7 7","3000個獲得","通常時へ");
+   addLog("🎯 大当り！ 3000個");
+  }
+ }else if(charge){
+  balls+=300;
+  text("喰種CHARGE","+300個","チャージ成功");
+  await wait(300);
+  if(chance(.5)){
+   rushMode=true;rushLeft=5;
+   text("RUSH突入！","チャージ成功！","HYPER喰種RUSH");
+   addLog("⚡ 喰種チャージからRUSH突入！");
+  }else{
+   text("CHARGE","+300個","通常時へ");
+   addLog("⚡ 喰種チャージ +300個");
+  }
+ }else{
+  if(hot){text("激アツ…","覚悟の証明","しかし──");await wait(350)}
+  text("ハズレ","……","次回転へ");
+  addLog("通常："+(hot?"激アツからハズレ":"ハズレ"));
+ }
+ $("screen").classList.remove("flash");$("bg").classList.remove("on");$("title").classList.remove("shake");
+ busy=false;update();
+}
+async function rushSpin(){
+ if(!rushMode||busy)return;
+ busy=true;update();
+ rushLeft--;
+ text("RUSH "+(5-rushLeft)+"/5","……","約1/7.7");
+ $("bg").classList.add("on");await wait(300);
+ if(chance(1/7.7)){
+  sound(990);
+  let add=chance(.5)?3000:6000;
+  balls+=add;
+  text("喰MAXハンド","大当り！！","+"+add+"個");
+  $("screen").classList.add("flash");
+  addLog("🔥 RUSH大当り！ +"+add+"個");
+  await wait(350);
+  if(add===6000&&chance(.5)){
+   balls+=3000;text("喰MAXループ！","さらに上乗せ","+3000個");addLog("💥 喰MAXループ +3000個");await wait(250);
+  }
+  rushLeft=5;
+ }else{
+  text("スルー","残り "+rushLeft+"回転","次の1回転へ");
+  addLog("RUSHスルー 残り"+rushLeft+"回転");
+  if(rushLeft===0){rushMode=false;text("RUSH終了","通常時へ","");addLog("RUSH終了");}
+ }
+ $("screen").classList.remove("flash");$("bg").classList.remove("on");
+ busy=false;update();
+}
+function quick(n){
+ if(busy||rushMode)return;
+ let got=false;
+ for(let i=0;i<n;i++){
+  spins++;
+  if(chance(1/999)){
+   hits++;
+   if(chance(.5)){balls+=7500;rushMode=true;rushLeft=5;got=true;addLog("🎯 "+(i+1)+"回転目：7500個＋RUSH");break}
+   balls+=3000;addLog("🎯 "+(i+1)+"回転目：3000個");
+  }else if(chance(1/538.8))balls+=300;
+ }
+ text(got?"RUSH突入！":n+"回転完了",got?"7500個獲得！":"結果を集計","スタートで演出を開始");
+ update();
+}
+function toggleCustom(){$("custom").style.display=$("custom").style.display==="none"?"block":"none"}
+function resetGame(){
+ spins=0;hits=0;balls=0;busy=false;rushMode=false;rushLeft=0;
+ $("log").innerHTML="";resetHolds();text("READY","スタートを押して下さい","保留 → 先読み → リーチ → 当落");
+ $("screen").classList.remove("flash");$("bg").classList.remove("on");update();
+}
+update();
+</script>
+</body></html>
