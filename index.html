@@ -2,196 +2,135 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>東京喰種 抽選体験機</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>東京喰種999 実機風抽選体験機</title>
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+body{
+ margin:0;background:#050505;color:#fff;
+ font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",
+ "Hiragino Kaku Gothic ProN",sans-serif;
+ text-align:center;
+}
+.container{max-width:600px;margin:auto;padding:15px}
+.machine{
+ background:linear-gradient(145deg,#222,#050505);
+ border:2px solid #444;border-radius:20px;
+ padding:15px;box-shadow:0 0 35px rgba(255,0,0,.2)
+}
+h1{font-size:30px;margin:8px}
+.subtitle{color:#aaa;font-size:12px}
+.display{
+ position:relative;overflow:hidden;
+ min-height:330px;margin-top:15px;
+ border:3px solid #444;border-radius:15px;
+ background:radial-gradient(circle,#361010,#020202 70%);
+ display:flex;flex-direction:column;
+ justify-content:center;align-items:center;
+ padding:20px;
+}
+.mode{
+ position:absolute;top:8px;left:10px;
+ color:#aaa;font-size:11px
+}
+.spin{
+ position:absolute;top:8px;right:10px;
+ color:#aaa;font-size:11px
+}
+.result{
+ font-size:40px;font-weight:1000;
+ text-shadow:0 0 15px #000;
+ z-index:2
+}
+.message{margin-top:10px;color:#ccc;z-index:2}
+.hint{margin-top:10px;color:#888;font-size:12px;z-index:2}
+
+.holds{
+ display:flex;gap:8px;margin-top:18px;z-index:3
+}
+.hold{
+ width:45px;height:45px;border-radius:50%;
+ background:#333;border:2px solid #777;
+ display:grid;place-items:center;
+ font-size:12px;font-weight:bold
+}
+.hold.red{
+ background:#a00000;border-color:#ff3333;
+ box-shadow:0 0 15px red
+}
+.hold.gold{
+ background:#9b7000;border-color:#ffe66b;
+ box-shadow:0 0 18px #ffd000
 }
 
-body {
-  margin: 0;
-  background: #080808;
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-    "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-  text-align: center;
+button{
+ width:100%;margin-top:10px;
+ padding:17px;border:0;border-radius:12px;
+ background:#b40000;color:#fff;
+ font-size:19px;font-weight:bold;
+ box-shadow:0 5px 0 #570000
+}
+button:active{transform:translateY(4px);box-shadow:0 1px #570000}
+button:disabled{background:#444;box-shadow:none}
+
+.subbuttons{
+ display:grid;grid-template-columns:1fr 1fr;
+ gap:8px
 }
 
-.container {
-  max-width: 600px;
-  margin: auto;
-  padding: 25px 15px 50px;
+.setting{
+ margin-top:10px;background:#111;
+ border:1px solid #333;border-radius:10px;
+ padding:10px;text-align:left;font-size:13px
+}
+.setting label{display:block;margin:7px}
+
+.stats{
+ display:grid;grid-template-columns:repeat(3,1fr);
+ gap:7px;margin-top:12px
+}
+.stat{
+ background:#111;border:1px solid #333;
+ border-radius:8px;padding:9px
+}
+.stat small{color:#888}
+.stat b{display:block;font-size:18px;margin-top:3px}
+
+.history{
+ margin-top:15px;text-align:left
+}
+.history h2{
+ font-size:17px;border-left:4px solid #b40000;
+ padding-left:8px
+}
+.history-list{
+ max-height:180px;overflow:auto;
+ background:#0d0d0d;border-radius:8px;padding:8px
+}
+.history-item{
+ display:flex;justify-content:space-between;
+ padding:7px;border-bottom:1px solid #222
 }
 
-h1 {
-  font-size: 30px;
-  margin: 10px 0 5px;
-  letter-spacing: 3px;
+.flash{animation:flash .18s alternate 8}
+@keyframes flash{
+ from{filter:brightness(1)}
+ to{filter:brightness(3)}
 }
-
-.subtitle {
-  color: #aaa;
-  margin-bottom: 25px;
+.shake{animation:shake .08s infinite alternate}
+@keyframes shake{
+ from{transform:translateX(-3px)}
+ to{transform:translateX(3px)}
 }
-
-.machine {
-  background: linear-gradient(145deg, #181818, #050505);
-  border: 2px solid #333;
-  border-radius: 20px;
-  padding: 25px 18px;
-  box-shadow: 0 0 30px rgba(255,0,0,.15);
+.super{
+ color:#ffd000;
+ text-shadow:0 0 20px #ff4500
 }
-
-.display {
-  background: #020202;
-  border: 2px solid #444;
-  border-radius: 12px;
-  min-height: 180px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 20px;
+.redtext{
+ color:#ff3030;
+ text-shadow:0 0 18px red
 }
-
-.result {
-  font-size: 42px;
-  font-weight: bold;
-  letter-spacing: 4px;
-}
-
-.result.normal {
-  color: #fff;
-}
-
-.result.rare {
-  color: #ff3333;
-  text-shadow: 0 0 15px red;
-}
-
-.result.super {
-  color: #ffcc00;
-  text-shadow: 0 0 20px #ff6600;
-}
-
-.message {
-  margin-top: 12px;
-  color: #aaa;
-  font-size: 14px;
-}
-
-button {
-  width: 100%;
-  padding: 18px;
-  border: none;
-  border-radius: 12px;
-  background: #b40000;
-  color: white;
-  font-size: 21px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 5px 0 #5c0000;
-}
-
-button:active {
-  transform: translateY(4px);
-  box-shadow: 0 1px 0 #5c0000;
-}
-
-button:disabled {
-  background: #444;
-  box-shadow: none;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 20px;
-}
-
-.stat {
-  background: #151515;
-  border: 1px solid #333;
-  border-radius: 10px;
-  padding: 12px 5px;
-}
-
-.stat-title {
-  color: #888;
-  font-size: 12px;
-}
-
-.stat-value {
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 4px;
-}
-
-.history {
-  margin-top: 25px;
-  text-align: left;
-}
-
-.history h2 {
-  font-size: 18px;
-  border-left: 4px solid #b40000;
-  padding-left: 10px;
-}
-
-.history-list {
-  max-height: 250px;
-  overflow-y: auto;
-  background: #101010;
-  border-radius: 10px;
-  padding: 10px;
-}
-
-.history-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 9px 5px;
-  border-bottom: 1px solid #252525;
-}
-
-.history-item:last-child {
-  border-bottom: none;
-}
-
-.rain {
-  animation: shake .08s infinite alternate;
-}
-
-@keyframes shake {
-  from {
-    transform: translateX(-2px);
-  }
-  to {
-    transform: translateX(2px);
-  }
-}
-
-.flash {
-  animation: flash .25s alternate 4;
-}
-
-@keyframes flash {
-  from {
-    background: #080808;
-  }
-  to {
-    background: #500000;
-  }
-}
-
-.note {
-  color: #777;
-  font-size: 12px;
-  margin-top: 20px;
-}
+.note{color:#666;font-size:10px;margin-top:15px}
 </style>
 </head>
 
@@ -199,223 +138,710 @@ button:disabled {
 
 <div class="container">
 
-  <h1>東京喰種</h1>
-  <div class="subtitle">抽選体験機</div>
+<h1>東京喰種</h1>
+<div class="subtitle">999 実機風 抽選体験機</div>
 
-  <div class="machine">
+<div class="machine">
 
-    <div class="display" id="display">
+<div class="display" id="display">
 
-      <div class="result normal" id="result">
-        READY
-      </div>
+<div class="mode" id="mode">通常時</div>
+<div class="spin" id="spin">0回転</div>
 
-      <div class="message" id="message">
-        ボタンを押して抽選開始
-      </div>
+<div class="result" id="result">READY</div>
 
-    </div>
+<div class="message" id="message">
+スタートを押してください
+</div>
 
-    <button id="drawButton" onclick="draw()">
-      抽選する
-    </button>
+<div class="hint" id="hint">
+保留 → 先読み → リーチ → 当落
+</div>
 
-    <div class="stats">
-
-      <div class="stat">
-        <div class="stat-title">抽選回数</div>
-        <div class="stat-value" id="total">0</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-title">当選回数</div>
-        <div class="stat-value" id="wins">0</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-title">当選率</div>
-        <div class="stat-value" id="rate">0%</div>
-      </div>
-
-    </div>
-
-    <div class="history">
-
-      <h2>抽選履歴</h2>
-
-      <div class="history-list" id="history">
-        <div style="color:#666;text-align:center;">
-          まだ抽選されていません
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-
-  <div class="note">
-    ※このページはファン向けの抽選体験シミュレーターです。
-  </div>
+<div class="holds">
+<div class="hold" id="hold0">保</div>
+<div class="hold" id="hold1">保</div>
+<div class="hold" id="hold2">保</div>
+<div class="hold" id="hold3">保</div>
+</div>
 
 </div>
 
+<button id="start" onclick="startSpin()">
+🔴 スタート
+</button>
 
+<button id="push" style="display:none" onclick="pushButton()">
+💥 押せ！！
+</button>
+
+<div class="subbuttons">
+<button onclick="toggleSettings()">⚙ 演出設定</button>
+<button onclick="resetGame()">リセット</button>
+</div>
+
+<div class="setting" id="settings" style="display:none">
+
+<label>
+<input type="checkbox" id="先バレ" checked>
+🔴 先バレ
+</label>
+
+<label>
+<input type="checkbox" id="保留" checked>
+🟡 保留変化
+</label>
+
+<label>
+<input type="checkbox" id="音" checked>
+🔊 効果音
+</label>
+
+</div>
+
+<div class="stats">
+
+<div class="stat">
+<small>回転数</small>
+<b id="total">0</b>
+</div>
+
+<div class="stat">
+<small>大当たり</small>
+<b id="wins">0</b>
+</div>
+
+<div class="stat">
+<small>RUSH</small>
+<b id="rushCount">0</b>
+</div>
+
+</div>
+
+<div class="history">
+<h2>抽選履歴</h2>
+<div class="history-list" id="history">
+<div style="color:#666;text-align:center">
+まだ抽選されていません
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="note">
+※ファン向けの抽選体験シミュレーターです。実機の抽選・演出を完全再現するものではありません。
+</div>
+
+</div>
 <script>
 
 let total = 0;
 let wins = 0;
+let rushCount = 0;
 
-const results = [
-  {
-    name: "ハズレ",
-    rate: 70,
-    className: "normal",
-    message: "今回は何も起こらなかった……"
-  },
-  {
-    name: "小当たり",
-    rate: 15,
-    className: "normal",
-    message: "少しだけ期待できそうだ。"
-  },
-  {
-    name: "当たり",
-    rate: 10,
-    className: "rare",
-    message: "来た……！"
-  },
-  {
-    name: "大当たり",
-    rate: 4,
-    className: "rare",
-    message: "赫子が……！？"
-  },
-  {
-    name: "超激アツ",
-    rate: 1,
-    className: "super",
-    message: "これは……まさか……！！"
-  }
-];
+let busy = false;
+let pendingHit = false;
+let pendingRush = false;
 
 
-function getResult() {
+/* =========================
+   効果音
+========================= */
 
-  const random = Math.random() * 100;
+function sound(type){
 
-  let current = 0;
+  if(!document.getElementById("音").checked) return;
 
-  for (const result of results) {
+  try{
 
-    current += result.rate;
+    const AudioContext =
+      window.AudioContext ||
+      window.webkitAudioContext;
 
-    if (random < current) {
-      return result;
+    const ctx = new AudioContext();
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    if(type === "alert"){
+      osc.frequency.value = 880;
     }
 
-  }
+    if(type === "hot"){
+      osc.frequency.value = 1200;
+    }
 
-  return results[0];
+    if(type === "hit"){
+      osc.frequency.value = 1600;
+    }
+
+    if(type === "rush"){
+      osc.frequency.value = 700;
+    }
+
+    gain.gain.value = 0.08;
+
+    osc.start();
+
+    setTimeout(() => {
+      osc.stop();
+      ctx.close();
+    }, 180);
+
+  }catch(e){}
+
 }
 
 
-function draw() {
+/* =========================
+   待ち時間
+========================= */
 
-  const button = document.getElementById("drawButton");
-  const display = document.getElementById("display");
-  const resultElement = document.getElementById("result");
-  const messageElement = document.getElementById("message");
+function wait(ms){
+
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
+
+}
+
+
+/* =========================
+   保留リセット
+========================= */
+
+function resetHolds(){
+
+  for(let i=0;i<4;i++){
+
+    const h = document.getElementById("hold"+i);
+
+    h.className = "hold";
+    h.textContent = "保";
+
+  }
+
+}
+
+
+/* =========================
+   保留変化
+========================= */
+
+async function holdChange(){
+
+  if(!document.getElementById("保留").checked){
+    return;
+  }
+
+  const h =
+    document.getElementById("hold3");
+
+  await wait(700);
+
+  h.className = "hold red";
+  h.textContent = "赤";
+
+  document.getElementById("hint").textContent =
+    "赤保留！";
+
+  await wait(900);
+
+}
+
+
+/* =========================
+   先バレ
+========================= */
+
+async function preAlert(){
+
+  if(!document.getElementById("先バレ").checked){
+    return;
+  }
+
+  if(Math.random() < 0.12){
+
+    sound("alert");
+
+    const display =
+      document.getElementById("display");
+
+    display.classList.add("flash");
+
+    document.getElementById("result").className =
+      "result redtext";
+
+    document.getElementById("result").textContent =
+      "先バレ！！";
+
+    document.getElementById("message").textContent =
+      "キュイン！";
+
+    document.getElementById("hint").textContent =
+      "期待度アップ！！";
+
+    await wait(1100);
+
+    display.classList.remove("flash");
+
+    return true;
+
+  }
+
+  return false;
+
+}
+
+
+/* =========================
+   スタート
+========================= */
+
+async function startSpin(){
+
+  if(busy) return;
+
+  busy = true;
+
+  const button =
+    document.getElementById("start");
 
   button.disabled = true;
 
-  display.classList.add("rain");
+  resetHolds();
 
-  resultElement.className = "result normal";
-  resultElement.textContent = "・・・";
+  const display =
+    document.getElementById("display");
 
-  messageElement.textContent = "抽選中……";
+  display.classList.add("shake");
 
-  setTimeout(() => {
+  document.getElementById("result").className =
+    "result";
 
-    display.classList.remove("rain");
+  document.getElementById("result").textContent =
+    "変動開始";
 
-    const result = getResult();
+  document.getElementById("message").textContent =
+    "保留入賞……";
 
-    total++;
+  document.getElementById("hint").textContent =
+    "通常変動";
 
-    if (
-      result.name === "当たり" ||
-      result.name === "大当たり" ||
-      result.name === "超激アツ"
-    ) {
-      wins++;
-    }
+  await wait(900);
 
-    resultElement.className =
-      "result " + result.className;
+  total++;
 
-    resultElement.textContent = result.name;
+  document.getElementById("total").textContent =
+    total;
 
-    messageElement.textContent = result.message;
-
-    updateStats();
-
-    addHistory(result);
-
-    if (
-      result.name === "大当たり" ||
-      result.name === "超激アツ"
-    ) {
-      display.classList.add("flash");
-
-      setTimeout(() => {
-        display.classList.remove("flash");
-      }, 1000);
-    }
-
-    button.disabled = false;
-
-  }, 1000);
-
-}
+  document.getElementById("spin").textContent =
+    total + "回転";
 
 
-function updateStats() {
+  /* 先バレ */
 
-  document.getElementById("total").textContent = total;
-
-  document.getElementById("wins").textContent = wins;
-
-  const rate =
-    total === 0
-      ? 0
-      : ((wins / total) * 100).toFixed(1);
-
-  document.getElementById("rate").textContent =
-    rate + "%";
-}
+  const alert =
+    await preAlert();
 
 
-function addHistory(result) {
+  /* 保留変化 */
 
-  const history = document.getElementById("history");
+  await holdChange();
 
-  if (total === 1) {
-    history.innerHTML = "";
+
+  /* =========================
+     1/999 大当たり抽選
+  ========================= */
+
+  const hit =
+    Math.random() < (1 / 999);
+
+
+  if(hit){
+
+    pendingHit = true;
+
+    display.classList.remove("shake");
+
+    await wait(600);
+
+    sound("hot");
+
+    document.getElementById("result").className =
+      "result super";
+
+    document.getElementById("result").textContent =
+      "東京喰種ZONE";
+
+    document.getElementById("message").textContent =
+      "突入！！";
+
+    document.getElementById("hint").textContent =
+      "激アツSPリーチ";
+
+    await wait(1400);
+
+
+    document.getElementById("result").textContent =
+      "覚醒";
+
+    document.getElementById("message").textContent =
+      "決意のマスク";
+
+    document.getElementById("hint").textContent =
+      "最終ジャッジ";
+
+    await wait(1400);
+
+
+    /* 押せボタン */
+
+    document.getElementById("result").textContent =
+      "運命の一撃";
+
+    document.getElementById("message").textContent =
+      "ボタンを押せ！！";
+
+    document.getElementById("hint").textContent =
+      "あなたの手で当落を決めろ";
+
+    document.getElementById("push").style.display =
+      "block";
+
+    return;
+
   }
 
-  const item = document.createElement("div");
 
-  item.className = "history-item";
+  /* ハズレ */
 
-  item.innerHTML = `
-    <span>${total}回目</span>
-    <strong>${result.name}</strong>
-  `;
+  display.classList.remove("shake");
+
+  document.getElementById("result").className =
+    "result";
+
+  document.getElementById("result").textContent =
+    "ハズレ";
+
+  document.getElementById("message").textContent =
+    "……";
+
+  document.getElementById("hint").textContent =
+    alert
+      ? "先バレ発生……しかし"
+      : "次回転へ";
+
+
+  addHistory("ハズレ");
+
+  await wait(1000);
+
+  busy = false;
+
+  button.disabled = false;
+
+}
+
+
+/* =========================
+   押せ！！
+========================= */
+
+async function pushButton(){
+
+  if(!pendingHit) return;
+
+  pendingHit = false;
+
+  document.getElementById("push").style.display =
+    "none";
+
+  const display =
+    document.getElementById("display");
+
+  display.classList.add("flash");
+
+  sound("hit");
+
+  document.getElementById("result").className =
+    "result super";
+
+  document.getElementById("result").textContent =
+    "777";
+
+  document.getElementById("message").textContent =
+    "大当たり！！";
+
+  document.getElementById("hint").textContent =
+    "約7500個＋RUSH！？";
+
+  wins++;
+
+  document.getElementById("wins").textContent =
+    wins;
+
+  addHistory("🎰 大当たり！！");
+
+  await wait(1600);
+
+  display.classList.remove("flash");
+
+
+  /* =========================
+     RUSH突入抽選
+  ========================= */
+
+  const rush =
+    Math.random() < 0.5;
+
+  if(rush){
+
+    pendingRush = true;
+
+    rushCount++;
+
+    document.getElementById("rushCount").textContent =
+      rushCount;
+
+    sound("rush");
+
+    document.getElementById("result").textContent =
+      "HYPER喰種RUSH";
+
+    document.getElementById("message").textContent =
+      "RUSH突入！！";
+
+    document.getElementById("hint").textContent =
+      "次のボタンでRUSH開始";
+
+    document.getElementById("push").style.display =
+      "block";
+
+    document.getElementById("push").textContent =
+      "🔥 RUSH突入！！";
+
+    return;
+
+  }
+
+
+  document.getElementById("result").textContent =
+    "大当たり終了";
+
+  document.getElementById("message").textContent =
+    "通常時へ";
+
+  document.getElementById("hint").textContent =
+    "次回転へ";
+
+  await wait(1200);
+
+  busy = false;
+
+  document.getElementById("start").disabled =
+    false;
+
+}
+
+
+/* =========================
+   RUSH開始
+========================= */
+
+async function startRush(){
+
+  pendingRush = false;
+
+  document.getElementById("push").style.display =
+    "none";
+
+  sound("rush");
+
+  document.getElementById("result").className =
+    "result super";
+
+  document.getElementById("result").textContent =
+    "🔥 RUSH 🔥";
+
+  document.getElementById("message").textContent =
+    "HYPER喰種RUSH";
+
+  document.getElementById("hint").textContent =
+    "約1/7.7のRUSH継続抽選";
+
+  await wait(1500);
+
+  const rushHit =
+    Math.random() < (1 / 7.7);
+
+  if(rushHit){
+
+    sound("hit");
+
+    document.getElementById("result").textContent =
+      "RUSH大当たり！！";
+
+    document.getElementById("message").textContent =
+      "喰MAX！！";
+
+    document.getElementById("hint").textContent =
+      "RUSH継続！";
+
+    addHistory("🔥 RUSH大当たり");
+
+    await wait(1300);
+
+    startRush();
+
+    return;
+
+  }
+
+
+  document.getElementById("result").textContent =
+    "RUSH終了";
+
+  document.getElementById("message").textContent =
+    "通常時へ";
+
+  document.getElementById("hint").textContent =
+    "お疲れ様でした";
+
+  addHistory("RUSH終了");
+
+  await wait(1300);
+
+  busy = false;
+
+  document.getElementById("start").disabled =
+    false;
+
+}
+
+
+/* =========================
+   押せボタンの動作分岐
+========================= */
+
+const originalPush =
+  document.getElementById("push");
+
+originalPush.addEventListener("click", function(){
+
+  if(pendingRush){
+
+    startRush();
+
+  }
+
+});
+
+
+/* =========================
+   履歴
+========================= */
+
+function addHistory(text){
+
+  const history =
+    document.getElementById("history");
+
+  if(total === 1 && history.children.length === 1){
+
+    history.innerHTML = "";
+
+  }
+
+  const item =
+    document.createElement("div");
+
+  item.className =
+    "history-item";
+
+  item.innerHTML =
+    "<span>"+total+"回転</span>" +
+    "<strong>"+text+"</strong>";
 
   history.prepend(item);
 
 }
+
+
+/* =========================
+   設定
+========================= */
+
+function toggleSettings(){
+
+  const settings =
+    document.getElementById("settings");
+
+  settings.style.display =
+    settings.style.display === "none"
+      ? "block"
+      : "none";
+
+}
+
+
+/* =========================
+   リセット
+========================= */
+
+function resetGame(){
+
+  total = 0;
+  wins = 0;
+  rushCount = 0;
+
+  busy = false;
+  pendingHit = false;
+  pendingRush = false;
+
+  document.getElementById("total").textContent = "0";
+  document.getElementById("wins").textContent = "0";
+  document.getElementById("rushCount").textContent = "0";
+  document.getElementById("spin").textContent = "0回転";
+
+  document.getElementById("result").className =
+    "result";
+
+  document.getElementById("result").textContent =
+    "READY";
+
+  document.getElementById("message").textContent =
+    "スタートを押してください";
+
+  document.getElementById("hint").textContent =
+    "保留 → 先読み → リーチ → 当落";
+
+  document.getElementById("push").style.display =
+    "none";
+
+  document.getElementById("push").textContent =
+    "💥 押せ！！";
+
+  document.getElementById("start").disabled =
+    false;
+
+  resetHolds();
+
+  document.getElementById("history").innerHTML =
+    '<div style="color:#666;text-align:center">まだ抽選されていません</div>';
+
+}
+
+
+/* =========================
+   初期状態
+========================= */
+
+resetGame();
 
 </script>
 
