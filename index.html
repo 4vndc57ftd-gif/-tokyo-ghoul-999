@@ -206,4 +206,218 @@ button:disabled {
 
     <div class="display" id="display">
 
-      <div class="result
+      <div class="result normal" id="result">
+        READY
+      </div>
+
+      <div class="message" id="message">
+        ボタンを押して抽選開始
+      </div>
+
+    </div>
+
+    <button id="drawButton" onclick="draw()">
+      抽選する
+    </button>
+
+    <div class="stats">
+
+      <div class="stat">
+        <div class="stat-title">抽選回数</div>
+        <div class="stat-value" id="total">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-title">当選回数</div>
+        <div class="stat-value" id="wins">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-title">当選率</div>
+        <div class="stat-value" id="rate">0%</div>
+      </div>
+
+    </div>
+
+    <div class="history">
+
+      <h2>抽選履歴</h2>
+
+      <div class="history-list" id="history">
+        <div style="color:#666;text-align:center;">
+          まだ抽選されていません
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="note">
+    ※このページはファン向けの抽選体験シミュレーターです。
+  </div>
+
+</div>
+
+
+<script>
+
+let total = 0;
+let wins = 0;
+
+const results = [
+  {
+    name: "ハズレ",
+    rate: 70,
+    className: "normal",
+    message: "今回は何も起こらなかった……"
+  },
+  {
+    name: "小当たり",
+    rate: 15,
+    className: "normal",
+    message: "少しだけ期待できそうだ。"
+  },
+  {
+    name: "当たり",
+    rate: 10,
+    className: "rare",
+    message: "来た……！"
+  },
+  {
+    name: "大当たり",
+    rate: 4,
+    className: "rare",
+    message: "赫子が……！？"
+  },
+  {
+    name: "超激アツ",
+    rate: 1,
+    className: "super",
+    message: "これは……まさか……！！"
+  }
+];
+
+
+function getResult() {
+
+  const random = Math.random() * 100;
+
+  let current = 0;
+
+  for (const result of results) {
+
+    current += result.rate;
+
+    if (random < current) {
+      return result;
+    }
+
+  }
+
+  return results[0];
+}
+
+
+function draw() {
+
+  const button = document.getElementById("drawButton");
+  const display = document.getElementById("display");
+  const resultElement = document.getElementById("result");
+  const messageElement = document.getElementById("message");
+
+  button.disabled = true;
+
+  display.classList.add("rain");
+
+  resultElement.className = "result normal";
+  resultElement.textContent = "・・・";
+
+  messageElement.textContent = "抽選中……";
+
+  setTimeout(() => {
+
+    display.classList.remove("rain");
+
+    const result = getResult();
+
+    total++;
+
+    if (
+      result.name === "当たり" ||
+      result.name === "大当たり" ||
+      result.name === "超激アツ"
+    ) {
+      wins++;
+    }
+
+    resultElement.className =
+      "result " + result.className;
+
+    resultElement.textContent = result.name;
+
+    messageElement.textContent = result.message;
+
+    updateStats();
+
+    addHistory(result);
+
+    if (
+      result.name === "大当たり" ||
+      result.name === "超激アツ"
+    ) {
+      display.classList.add("flash");
+
+      setTimeout(() => {
+        display.classList.remove("flash");
+      }, 1000);
+    }
+
+    button.disabled = false;
+
+  }, 1000);
+
+}
+
+
+function updateStats() {
+
+  document.getElementById("total").textContent = total;
+
+  document.getElementById("wins").textContent = wins;
+
+  const rate =
+    total === 0
+      ? 0
+      : ((wins / total) * 100).toFixed(1);
+
+  document.getElementById("rate").textContent =
+    rate + "%";
+}
+
+
+function addHistory(result) {
+
+  const history = document.getElementById("history");
+
+  if (total === 1) {
+    history.innerHTML = "";
+  }
+
+  const item = document.createElement("div");
+
+  item.className = "history-item";
+
+  item.innerHTML = `
+    <span>${total}回目</span>
+    <strong>${result.name}</strong>
+  `;
+
+  history.prepend(item);
+
+}
+
+</script>
+
+</body>
+</html>
